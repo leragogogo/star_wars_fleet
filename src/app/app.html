@@ -1,7 +1,8 @@
 <div class="flex justify-start font-[var(--inter-font)] p-4">
   <div class="rounded-lg overflow-hidden border border-black/20">
     <div class="overflow-x-auto flex justify-start">
-      <table class="border-collapse bg-[var(--septenary-contrast)] table-fixed ml-0" [style.width.px]="tableWidth()">
+      <table ngGrid class="border-collapse bg-[var(--septenary-contrast)] table-fixed ml-0"
+        [style.width.px]="tableWidth()">
         <colgroup>
           @for (w of colWidths(); track $index) {
           <col [style.width.px]="w" />
@@ -11,51 +12,52 @@
          [&_th]:text-gray-500 [&_th]:font-semibold [&_th]:text-xs
          [&_th]:border-b [&_th]:border-r [&_th]:border-black/20
          [&_th:last-child]:border-r-0 [&_th]:break-words [&_th]:text-left">
-          <tr>
-            <th class="relative group select-none"></th>
-            <th class="relative group select-none">
+          <tr ngGridRow>
+            <th ngGridCell class="relative group select-none"></th>
+
+            <th ngGridCell class="relative group select-none">
               Name
               <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
                    group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 1)">
               </span>
             </th>
-            <th class="relative group select-none">
+            <th ngGridCell class="relative group select-none">
               Model
               <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
                    group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 2)">
               </span>
             </th>
-            <th class="relative group select-none">
+            <th ngGridCell class="relative group select-none">
               Manufacturer
               <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
                     group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 3)">
               </span>
             </th>
-            <th class="relative group select-none">
+            <th ngGridCell class="relative group select-none">
               Crew
               <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
                    group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 4)">
               </span>
             </th>
-            <th class="relative group select-none">
+            <th ngGridCell class="relative group select-none">
               Passengers
               <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
            group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 5)">
               </span>
             </th>
-            <th class="relative group select-none">
+            <th ngGridCell class="relative group select-none">
               Hyperdrive Rating
               <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
                    group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 6)">
               </span>
             </th>
-            <th class="relative group select-none">
+            <th ngGridCell class="relative group select-none">
               Cargo Capacity
               <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
                    group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 7)">
               </span>
             </th>
-            <th class="relative group select-none">
+            <th ngGridCell class="relative group select-none">
               Consumables
               <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
                    group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 8)">
@@ -77,30 +79,55 @@
           }
 
           @for (starship of (starshipsService.starships$ | async) ?? []; track starship.name) {
-          <tr class="hover:bg-[var(--septenary-contrast)] focus-within:bg-[var(--septenary-contrast)]">
-            <td></td>
-            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
-              {{ starship.name }}
+          <tr ngGridRow class="hover:bg-[var(--septenary-contrast)] focus-within:bg-[var(--septenary-contrast)]">
+            <td ngGridCell></td>
+            <td ngGridCell
+              class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+
+              <div type="button" ngGridCellWidget aria-label="edit name" widgetType="editable"
+                class="group flex items-center justify-between gap-2 outline-none"
+                (onActivate)="startEdit($event, starship, nameInput)" (onDeactivate)="completeEdit($event, starship)"
+                #widget="ngGridCellWidget">
+                <div class="flex-1 min-w-0 overflow-hidden">
+                  <span [class.hidden]="widget.isActivated()">{{ starship.name }}</span>
+                  <input [class.hidden]="!widget.isActivated()"
+                    class="w-full min-w-0 bg-transparent px-2 py-1 p-0 m-0 text-inherit text-sm leading-5"
+                    [(ngModel)]="nameDraft" #nameInput />
+                </div>
+                <button tabindex="-1" aria-label="edit name"
+                  class="material-symbols-outlined opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity"
+                  (click)="onClickEdit(widget)" [class.hidden]="widget.isActivated()"
+                  translate="no">
+                  edit
+                </button>
+              </div>
             </td>
-            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+            <td ngGridCell
+              class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
               {{ starship.model }}
             </td>
-            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+            <td ngGridCell
+              class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
               {{ starship.manufacturer }}
             </td>
-            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+            <td ngGridCell
+              class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
               {{ starship.crew }}
             </td>
-            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+            <td ngGridCell
+              class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
               {{ starship.passengers }}
             </td>
-            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+            <td ngGridCell
+              class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
               {{ starship.hyperdrive_rating }}
             </td>
-            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+            <td ngGridCell
+              class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
               {{ starship.cargo_capacity }}
             </td>
-            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+            <td ngGridCell
+              class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
               {{ starship.consumables }}
             </td>
           </tr>

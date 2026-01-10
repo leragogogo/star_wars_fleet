@@ -1,16 +1,17 @@
 import { Component, ElementRef, ViewChild, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
-
+import { Grid, GridRow, GridCell, GridCellWidget } from '@angular/aria/grid';
 import { StarshipsService } from '../services/starships.service';
+import { Starship } from '../models/starship';
 
 
 @Component({
   standalone: true,
   selector: 'app-root',
   templateUrl: 'app.html',
-  styleUrl: 'app.css',
-  imports: [FormsModule, AsyncPipe],
+  styleUrl: "app.css",
+  imports: [FormsModule, AsyncPipe, Grid, GridRow, GridCell, GridCellWidget,],
 })
 
 export class App {
@@ -23,6 +24,9 @@ export class App {
   tableWidth = computed(() => {
     return this.colWidths().reduce((sum: number, width: number) => sum + width, 0);
   });
+
+  // Local store for name input
+  nameDraft: string = '';
 
   private resizingIndex: number | null = null;
   private startX = 0;
@@ -85,5 +89,59 @@ export class App {
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
   }
+
+  /**
+   * Activates widget on click
+   * @param widget Edit button
+   */
+  onClickEdit(widget: GridCellWidget) {
+    if (widget.isActivated()) return;
+
+    widget.activate();
+  }
+
+  /**
+   * Starts editing for the "Name" cell
+   * - Copies the current starship name into a local draft 
+   * - Focuses the input
+   * @param event Event emitted by the grid widget activation
+   * @param starship The row object being edited
+   * @param inputEl The <input> element inside the cell with focus.
+   */
+  startEdit(
+    event: KeyboardEvent | FocusEvent | undefined,
+    starship: Starship,
+    inputEl: HTMLInputElement,
+  ): void {
+    this.nameDraft = starship.name;
+
+    inputEl.focus();
+
+    if (!(event instanceof KeyboardEvent)) return;
+
+    if (event.key.length === 1) {
+      this.nameDraft = event.key;
+    }
+  }
+  
+  /**
+   * Finishes editing when the widget deactivates
+   * We only accept the edit when the user presses Enter
+   * @param event Event emitted by the grid widget activation
+   * @param starship The row object being edited
+   */
+  completeEdit(
+    event: KeyboardEvent | FocusEvent | undefined,
+    starship: Starship
+  ): void {
+    if (!(event instanceof KeyboardEvent)) {
+      return;
+    }
+    if (event.key === 'Enter') {
+      starship.name = this.nameDraft;
+    }
+
+  }
+
 }
 

@@ -16,11 +16,13 @@ export class StarshipsService {
     private loadingSubject = new BehaviorSubject<boolean>(false);
     private errorSubject = new BehaviorSubject<string | null>(null);
     private hasMoreSubject = new BehaviorSubject<boolean>(true);
+    private editingErrorSubject = new BehaviorSubject<string | null>(null);
 
     readonly starships$ = this.starshipsSubject.asObservable();
     readonly loading$ = this.loadingSubject.asObservable();
     readonly error$ = this.errorSubject.asObservable();
     readonly hasMore$ = this.hasMoreSubject.asObservable();
+    readonly editingError$ = this.editingErrorSubject.asObservable();
 
     private currentPage = 1
 
@@ -54,5 +56,38 @@ export class StarshipsService {
             ),
             finalize(() => this.loadingSubject.next(false))
         ).subscribe();
+    }
+
+    /**
+     * Handles starship's name editing 
+     */
+    editName(startshipName: string, updatedName: string): void {
+        this.swapiClient.patchName(startshipName, updatedName).pipe(
+            tap(() => {
+                const currentStarships = this.starshipsSubject.value;
+
+                // Find updated starship
+                const editedStarshipIndex = this.starshipsSubject.value.findIndex(
+                    (starship: Starship) => starship.name == startshipName
+                );
+
+                // Update starship with a new name
+                let editedStarship = this.starshipsSubject.value[editedStarshipIndex];
+                editedStarship = { ...currentStarships[editedStarshipIndex], name: updatedName };
+
+                // Update the list of starships
+                this.starshipsSubject.next(
+                    [
+                        ...currentStarships.slice(0, editedStarshipIndex),
+                        editedStarship,
+                        ...currentStarships.slice(editedStarshipIndex + 1)
+                    ]);
+            }),
+            catchError((err: HttpErrorResponse) => {
+                this.editingErrorSubject.next(err.message);
+                return EMPTY;
+            }
+            ),
+        ).subscribe()
     }
 }
