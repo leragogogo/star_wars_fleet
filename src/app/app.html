@@ -1,40 +1,113 @@
-<table ngGrid class="basic-data-table">
-  <thead>
-    <tr ngGridRow>
-      <th ngGridCell>
+<div class="flex justify-start font-[var(--inter-font)] p-4">
+  <div class="rounded-lg overflow-hidden border border-black/20">
+    <div class="overflow-x-auto flex justify-start">
+      <table class="border-collapse bg-[var(--septenary-contrast)] table-fixed ml-0" [style.width.px]="tableWidth()">
+        <colgroup>
+          @for (w of colWidths(); track $index) {
+          <col [style.width.px]="w" />
+          }
+        </colgroup>
+        <thead class="[&_th]:px-4 [&_th]:py-3
+         [&_th]:text-gray-500 [&_th]:font-semibold [&_th]:text-xs
+         [&_th]:border-b [&_th]:border-r [&_th]:border-black/20
+         [&_th:last-child]:border-r-0 [&_th]:break-words [&_th]:text-left">
+          <tr>
+            <th class="relative group select-none"></th>
+            <th class="relative group select-none">
+              Name
+              <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
+                   group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 1)">
+              </span>
+            </th>
+            <th class="relative group select-none">
+              Model
+              <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
+                   group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 2)">
+              </span>
+            </th>
+            <th class="relative group select-none">
+              Manufacturer
+              <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
+                    group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 3)">
+              </span>
+            </th>
+            <th class="relative group select-none">
+              Crew
+              <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
+                   group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 4)">
+              </span>
+            </th>
+            <th class="relative group select-none">
+              Passengers
+              <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
+           group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 5)">
+              </span>
+            </th>
+            <th class="relative group select-none">
+              Hyperdrive Rating
+              <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
+                   group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 6)">
+              </span>
+            </th>
+            <th class="relative group select-none">
+              Cargo Capacity
+              <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
+                   group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 7)">
+              </span>
+            </th>
+            <th class="relative group select-none">
+              Consumables
+              <span class="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none
+                   group-hover:bg-blue-500/20" (pointerdown)="startResize($event, 8)">
+              </span>
+            </th>
+          </tr>
+        </thead>
 
-      </th>
-      <th ngGridCell>
-        Name
-      </th>
-      <th ngGridCell>Model</th>
-      <th ngGridCell>Manufacturer</th>
-      <th ngGridCell>Crew</th>
-      <th ngGridCell>Passengers</th>
-      <th ngGridCell>Hyperdrive Rating</th>
-      <th ngGridCell>Cargo Capacity</th>
-      <th ngGridCell>Consumables</th>
-    </tr>
-  </thead>
-  <tbody>
-    @if (starshipsService.error$ | async; as err) {
-      <p style="color:red">Error: {{ err }}</p>
-    }
-    @for (starship of (starshipsService.starships$ | async) ?? []; track starship.name) {
-    <tr ngGridRow>
-      <td ngGridCell>
+        <tbody class="bg-[var(--octonary-contrast)]
+               [&_td]:px-4 [&_td]:py-3
+               [&_td]:border-b [&_td]:border-r [&_td]:border-black/20 [&_td]:text-sm
+               [&_td:last-child]:border-r-0
+               [&_tr:last-child_td]:border-b-0
+               [&_td]:break-words">
+          @if (starshipsService.error$ | async; as err) {
+          <tr>
+            <td colspan="9" class="text-red-600">Error: {{ err }}</td>
+          </tr>
+          }
 
-      </td>
-      <td ngGridCell>{{ starship.name }}</td>
-      <td ngGridCell>{{ starship.model }}</td>
-      <td ngGridCell>{{ starship.manufacturer }}</td>
-      <td ngGridCell>{{ starship.crew }}</td>
-      <td ngGridCell>{{ starship.passengers }}</td>
-      <td ngGridCell>{{ starship.hyperdrive_rating }}</td>
-      <td ngGridCell>{{ starship.cargo_capacity }}</td>
-      <td ngGridCell>{{ starship.consumables }}</td>
-    </tr>
-    }
-  </tbody>
-  <div #bottom style="height: 1px;"></div>
-</table>
+          @for (starship of (starshipsService.starships$ | async) ?? []; track starship.name) {
+          <tr class="hover:bg-[var(--septenary-contrast)] focus-within:bg-[var(--septenary-contrast)]">
+            <td></td>
+            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+              {{ starship.name }}
+            </td>
+            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+              {{ starship.model }}
+            </td>
+            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+              {{ starship.manufacturer }}
+            </td>
+            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+              {{ starship.crew }}
+            </td>
+            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+              {{ starship.passengers }}
+            </td>
+            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+              {{ starship.hyperdrive_rating }}
+            </td>
+            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+              {{ starship.cargo_capacity }}
+            </td>
+            <td class="hover:ring-1 hover:ring-blue-500/60 focus-within:ring-1 focus-within:ring-blue-500/60">
+              {{ starship.consumables }}
+            </td>
+          </tr>
+          }
+        </tbody>
+        <div #bottom class="h-px"></div>
+      </table>
+    </div>
+  </div>
+</div>
