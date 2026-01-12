@@ -15,10 +15,27 @@ import { Starship } from '../models/starship';
 })
 
 export class App {
+  // Column configuration
+  columns: Array<{ key: keyof Starship; label: string, width: number }> = [
+    { key: 'name', label: 'Name', width: 150 },
+    { key: 'model', label: 'Model', width: 150 },
+    { key: 'manufacturer', label: 'Manufacturer', width: 150 },
+    { key: 'crew', label: 'Crew', width: 150 },
+    { key: 'passengers', label: 'Passengers', width: 150 },
+    { key: 'hyperdrive_rating', label: 'Hyperdrive Rating', width: 150 },
+    { key: 'cargo_capacity', label: 'Cargo Capacity', width: 150 },
+    { key: 'consumables', label: 'Consumables', width: 150 },
+  ];
+
+  // Returns a string value for a generic cell
+  cellValue(starship: Starship, key: keyof Starship): string {
+    return starship[key]
+  }
+
   starshipsService = inject(StarshipsService);
 
-  // Initial widths for the columns
-  colWidths = signal<number[]>([40, 150, 150, 150, 150, 150, 150, 150, 150]);
+  // Initial widths of the columns
+  colWidths = signal<number[]>(this.columns.map(c => c.width));
 
   // Calculate total table width based on column widths
   tableWidth = computed(() => {
@@ -106,7 +123,7 @@ export class App {
    * - Focuses the input
    * @param event Event emitted by the grid widget activation
    * @param starship The row object being edited
-   * @param inputEl The <input> element inside the cell with focus.
+   * @param inputEl The <input> element inside the cell with focus
    */
   startEdit(
     event: KeyboardEvent | FocusEvent | undefined,
@@ -123,7 +140,7 @@ export class App {
       this.nameDraft = event.key;
     }
   }
-  
+
   /**
    * Finishes editing when the widget deactivates
    * We only accept the edit when the user presses Enter

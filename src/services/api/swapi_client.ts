@@ -11,16 +11,18 @@ export class SwapiClient {
     private readonly baseUrl = 'https://swapi.dev/api';
 
     /**
-     * Gets a page of starships using the SWAPI server-side pagination.
+     * Gets a page of starships using the SWAPI server-side pagination
      */
     getStarshipsPage(page: number): Observable<PageResponseSchema> {
+        console.log(page);
         const params = new HttpParams().set("page", String(page));
         return this.http.get<PageResponseSchema>(`${this.baseUrl}/starships`, { params });
     }
 
     /**
-     * API call to edit a starship's name.
-     * It's a placeholder in the current implementation.
+     * API call to edit a starship's name
+     * It's a placeholder in the current implementation
+     * Can be replaced with a right endpoint later on
      */
     patchName(startshipId: string, updatedName: string): Observable<Starship> {
         return this.http.get<Starship>(`${this.baseUrl}/starships/9/`);
