@@ -57,10 +57,12 @@ export class App {
 
   private io?: IntersectionObserver;
 
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     // Initial load of the first page
     this.starshipsService.loadNextPage();
+  }
 
+  ngAfterViewInit(): void {
     // Load next page when intersections take place
     this.io = new IntersectionObserver((entries) => {
       if (entries.some(e => e.isIntersecting)) {

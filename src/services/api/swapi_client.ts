@@ -14,7 +14,6 @@ export class SwapiClient {
      * Gets a page of starships using the SWAPI server-side pagination
      */
     getStarshipsPage(page: number): Observable<PageResponseSchema> {
-        console.log(page);
         const params = new HttpParams().set("page", String(page));
         return this.http.get<PageResponseSchema>(`${this.baseUrl}/starships`, { params });
     }

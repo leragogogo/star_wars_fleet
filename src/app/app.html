@@ -19,7 +19,7 @@
     </div>
     <!-- Data grid -->
     <div class="relative min-h-[100px]">
-      <div class="overflow-x-auto flex justify-start">
+      <div #scroller class="overflow-x-auto flex justify-start">
         <table ngGrid class="border-collapse bg-[var(--septenary-contrast)] table-fixed ml-0"
           [style.width.px]="tableWidth()">
           <colgroup>
@@ -80,7 +80,6 @@
             </tr>
             }
           </tbody>
-          <div #bottom class="h-px"></div>
         </table>
       </div>
 
@@ -113,6 +112,5 @@
       </div>
       }
     </div>
-
   </div>
 </div>
