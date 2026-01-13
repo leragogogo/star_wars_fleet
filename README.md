@@ -1,59 +1,133 @@
-# StarWarsFleet
+# Star Wars Fleet
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.4.
+Single‑page Angular app that displays Starships from SWAPI in a data grid with infinite scroll, editing, and search functionality.
 
-## Development server
+The app is available at https://leragogogo.github.io/star_wars_fleet/.
 
-To start a local development server, run:
+---
 
-```bash
-ng serve
+## Important Notes
+The SWAPI(https://swapi.dev) doesn’t have a valid certificate anymore. To run this app, you need to start a browser session without certificate verification rules. I couldn’t use another API since all of the ones that I found do not have server-side pagination, which is required by the task.
+
+Please find the browser setup instructions for Windows, MacOS, and Linux that are needed to run my app both locally and from the deployed site:
+
+### Windows Instruction 
+Run this command in the console:
+```console
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --ignore-certificate-errors
+```
+Now you can run a local server or a deployed site in this browser session.
+
+### MacOs Instruction
+Run this command in the console:
+```console
+open -na "Google Chrome" --args --ignore-certificate-errors --user-data-dir=/tmp/chrome-insecure
+```
+Now you can run a local server or a deployed site in this browser session.
+
+### Linux
+Run this command in the console:
+```console
+google-chrome --ignore-certificate-errors --user-data-dir=/tmp/chrome-insecure
+```
+Now you can run a local server or a deployed site in this browser session.
+
+---
+
+## SWAPI resource
+
+This project uses the **Starships** resource:
+
+- Endpoint: `https://swapi.dev/api/starships?page=<n>`
+
+
+---
+
+## Getting started
+
+### Prerequisites
+- Node.js + npm
+
+### Install
+```console
+npm install
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### Run the app
+```console
+npm start
+# or: ng serve
+```
+---
 
-## Code scaffolding
+## Tests
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Run unit tests with Jest:
 
-```bash
-ng generate component component-name
+```console
+npm test
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Minimal required tests are provided:
+- **Service test**: pagination/combining pages and search filtering
+- **Component test**: cells editing
 
-```bash
-ng generate --help
-```
+(see `*.spec.ts` files).
 
-## Building
+---
 
-To build the project run:
+## Infinite scroll
 
-```bash
-ng build
-```
+- The component places a **sentinel element** (`#bottom`) at the bottom of the table.
+- An **IntersectionObserver** watches the sentinel.
+- When the sentinel becomes visible, `starshipsService.loadNextPage()` is called.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+See `src/app/app.ts` and `src/services/starships.service.ts`.
 
-## Running unit tests
+---
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Search
 
-```bash
-ng test
-```
+- Search input is above the grid.
+- Filtering is **client-side** over the already loaded rows.
+- Query is **debounced** (`150ms`) and filtering is case‑insensitive.
+- When the query is non-empty and no rows match, a **“No matches found”** overlay is displayed.
 
-## Running end-to-end tests
+See `src/services/starships.service.ts` (`searchQuery$`, `filteredStarships$`) and `src/app/app.html`.
 
-For end-to-end (e2e) testing, run:
+---
 
-```bash
-ng e2e
-```
+## Editable cells
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+- **Editable column:** `Name`
+- Editing is activated via the edit icon (grid cell widget).
+- Draft value is stored locally in the component (`nameDraft`).
+- The edit is committed on Enter
 
-## Additional Resources
+There is also a service method (`editName(...)`) and a placeholder API method (`patchName(...)`) to make it easy to replace for an actual API call later on.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+---
+
+## Column resizing
+
+- Header cells have a drag handle (`cursor-col-resize` span).
+- Resizing is implemented with `pointerdown`, `pointermove`, and `pointerup` listeners.
+- Column widths are stored in a `signal` (`colWidths`).
+- Widths are applied through a `<colgroup>` and the table’s total width is computed (`tableWidth`).
+- The table is wrapped in `overflow-x-auto` so horizontal scrolling appears when needed.
+
+See `src/app/app.ts` (`startResize`, `colWidths`, `tableWidth`) and `src/app/app.html`.
+
+---
+
+## Trade-offs / limitations
+
+- **Caching pages:** Once a page is loaded, it is stored locally and never revalidated during infinite scroll. Therefore, if the backend data changes for rows that were already loaded, the UI will continue showing the old values until the user reloads the app.
+
+---
+
+## Third‑party packages used
+
+- `@angular/aria/grid` — grid primitives and editable cell widget
+- Tailwind CSS — styling utilities
+- Jest — tests
