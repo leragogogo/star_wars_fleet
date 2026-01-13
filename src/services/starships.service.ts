@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, EMPTY, combineLatest } from 'rxjs';
-import { catchError, finalize, tap, debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { Subject, BehaviorSubject, EMPTY, combineLatest } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SwapiClient } from './api/swapi_client';
 import { Starship } from '../models/starship';
 import { PageResponseSchema } from '../models/page_response_schema';
 import { inject } from '@angular/core';
+import { concatMap, tap, catchError, finalize, filter, map, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 /**
  * Central state manager for the Starships table:
@@ -26,6 +26,9 @@ export class StarshipsService {
 
     private searchQuerySubject = new BehaviorSubject<string>('');
 
+    // Requests to load the next page go here
+    private loadMore$ = new Subject<void>();
+
     readonly starships$ = this.starshipsSubject.asObservable();
     readonly loading$ = this.loadingSubject.asObservable();
     readonly error$ = this.errorSubject.asObservable();
@@ -39,6 +42,40 @@ export class StarshipsService {
         debounceTime(150),
         distinctUntilChanged(),
     );
+
+    private currentPage = 1
+
+    constructor() {
+        // Process load requests one-by-one
+        this.loadMore$
+            .pipe(
+                // Ignore requests, when no more data
+                filter(() => this.hasMoreSubject.value),
+
+                // Next request starts only after previous completes
+                concatMap(() => {
+                    this.loadingSubject.next(true);
+                    this.errorSubject.next(null);
+
+                    return this.swapiClient.getStarshipsPage(this.currentPage).pipe(
+                        tap((page: PageResponseSchema) => {
+                            // Add new data to a list of starships
+                            this.starshipsSubject.next([...this.starshipsSubject.value, ...page.results])
+
+                            this.hasMoreSubject.next(page.next !== null);
+
+                            this.currentPage += 1;
+                        }),
+                        catchError((err: HttpErrorResponse) => {
+                            this.errorSubject.next(err.message);
+                            return EMPTY;
+                        }),
+                        finalize(() => this.loadingSubject.next(false))
+                    );
+                }),
+            )
+            .subscribe();
+    }
 
     readonly filteredStarships$ = combineLatest([this.starships$, this.searchQuery$]).pipe(
         map(([starships, query]: [Starship[], string]) => {
@@ -63,38 +100,12 @@ export class StarshipsService {
         this.searchQuerySubject.next(query);
     }
 
-    private currentPage = 1
-
     /**
      * Loads next page of data. 
      * When there no more data, doesn't call API
      */
     loadNextPage(): void {
-        // Don't proceed when the loading of previous page still running
-        if (this.loadingSubject.value) return;
-
-        // Don't proceed when no more data
-        if (!this.hasMoreSubject.value) return;
-
-        this.loadingSubject.next(true);
-        this.errorSubject.next(null);
-
-        this.swapiClient.getStarshipsPage(this.currentPage).pipe(
-            tap((page: PageResponseSchema) => {
-                // Add new data to a list of starships
-                this.starshipsSubject.next([...this.starshipsSubject.value, ...page.results])
-
-                this.hasMoreSubject.next(page.next !== null);
-
-                this.currentPage += 1;
-            }),
-            catchError((err: HttpErrorResponse) => {
-                this.errorSubject.next(err.message);
-                return EMPTY;
-            }
-            ),
-            finalize(() => this.loadingSubject.next(false))
-        ).subscribe();
+        this.loadMore$.next();
     }
 
     /**
