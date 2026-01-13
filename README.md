@@ -48,6 +48,12 @@ This project uses the **Starships** resource:
 ### Prerequisites
 - Node.js + npm
 
+### Clone repository
+```console
+git clone https://github.com/leragogogo/star_wars_fleet.git
+cd star_wars_fleet
+```
+
 ### Install
 ```console
 npm install
